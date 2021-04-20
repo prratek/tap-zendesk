@@ -10,14 +10,20 @@ from singer import Transformer
 LOGGER = singer.get_logger()
 
 
+def listify_ticket_audit_event_values(record: dict) -> dict:
+    """Convert string event values to list to ensure a consistent data type across rows"""
+    for evt in record.get("events"):
+        if isinstance(evt.get("value"), str):
+            evt["value"] = [evt["value"]]
+    return record
+
+
 def process_record(record, stream_id: str):
     """ Serializes Zenpy's internal classes into Python objects via ZendeskEncoder. """
-    if stream_id == "ticket_audits":
-        for evt in record["events"]:
-            if isinstance(evt["value"], str):
-                evt["value"] = [evt["value"]]
     rec_str = json.dumps(record, cls=ZendeskEncoder)
     rec_dict = json.loads(rec_str)
+    if stream_id == "ticket_audits":
+        rec_dict = listify_ticket_audit_event_values(record)
     return rec_dict
 
 
