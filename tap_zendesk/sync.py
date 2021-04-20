@@ -23,7 +23,7 @@ def process_record(record, stream_id: str):
     rec_str = json.dumps(record, cls=ZendeskEncoder)
     rec_dict = json.loads(rec_str)
     if stream_id == "ticket_audits":
-        rec_dict = listify_ticket_audit_event_values(record)
+        rec_dict = listify_ticket_audit_event_values(rec_dict)
     return rec_dict
 
 
