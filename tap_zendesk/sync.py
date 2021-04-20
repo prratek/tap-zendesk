@@ -10,8 +10,12 @@ from singer import Transformer
 LOGGER = singer.get_logger()
 
 
-def process_record(record):
+def process_record(record, stream_id: str):
     """ Serializes Zenpy's internal classes into Python objects via ZendeskEncoder. """
+    if stream_id == "ticket_audits":
+        for evt in record["events"]:
+            if isinstance(evt["value"], str):
+                evt["value"] = [evt["value"]]
     rec_str = json.dumps(record, cls=ZendeskEncoder)
     rec_dict = json.loads(rec_str)
     return rec_dict
@@ -35,7 +39,7 @@ def sync_stream(state, start_date, instance):
             if stream.tap_stream_id == parent_stream.tap_stream_id:
                 counter.increment()
 
-            rec = process_record(record)
+            rec = process_record(record, stream.tap_stream_id)
             # SCHEMA_GEN: Comment out transform
             rec = transformer.transform(rec, stream.schema.to_dict(), metadata.to_map(stream.metadata))
 
