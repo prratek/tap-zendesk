@@ -15,6 +15,8 @@ def listify_ticket_audit_event_values(record: dict) -> dict:
     for evt in record.get("events"):
         if isinstance(evt.get("value"), str):
             evt["value"] = [evt["value"]]
+        if isinstance(evt.get("previous_value"), str):
+            evt["previous_value"] = [evt["previous_value"]]
     return record
 
 
